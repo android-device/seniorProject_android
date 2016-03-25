@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Temperature Monitor</string>
+    <string name="action_settings">Settings</string>
+    <string name="sensor_headings">Saved Sensors</string>
+    <string name="no_sensors">No sensors added! Use the button below to add some.</string>
+    <string name="add_sensor">Add a New Sensor</string>
+</resources>
