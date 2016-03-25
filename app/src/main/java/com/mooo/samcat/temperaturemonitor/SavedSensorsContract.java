@@ -17,6 +17,7 @@ public class SavedSensorsContract {
         public static final String SENSOR_ID = "sensorId";
         public static final String SENSOR_VALUE = "sensorValue";
         public static final String SENSOR_BATTERY = "sensorBattery";
+        public static final String SENSOR_HUMANREADABLE = "sensorHumanReadable";
     }
 
     //SensorReaderDbHelper mDbHelper = new SensorReaderDbHelper(getContext());

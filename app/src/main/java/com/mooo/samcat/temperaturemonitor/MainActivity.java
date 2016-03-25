@@ -42,7 +42,8 @@ public class MainActivity extends AppCompatActivity {
                 SavedSensorsContract.SensorEntry._ID,
                 SavedSensorsContract.SensorEntry.SENSOR_ID,
                 SavedSensorsContract.SensorEntry.SENSOR_VALUE,
-                SavedSensorsContract.SensorEntry.SENSOR_BATTERY
+                SavedSensorsContract.SensorEntry.SENSOR_BATTERY,
+                SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE
         };
         Log.d("STATE","past projection");
 
