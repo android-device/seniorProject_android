@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                 null,
                 null,
                 null,
-                null
+                null //no sort
         );
         Log.d("STATE","past query");
 
