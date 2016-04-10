@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private ContentValues valuesToAdd_db;
     public final static String EXTRA_DB = "com.mooo.samcat.temperaturemonitor.db";
     private TextView userMessage;
+    private TextView contentMessage;
 
     private final static int dataBaseRequestCode = 1;
     private final static int bleRequestCode = 2;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
         userMessage = (TextView) findViewById(R.id.main_message);
+        contentMessage = (TextView) findViewById(R.id.placeholder);
 
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
@@ -139,6 +141,9 @@ public class MainActivity extends AppCompatActivity {
                 valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, data.getStringExtra("sensorHuman"));
                 valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_BATTERY, "100");
                 valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_VALUE, "0");
+            }
+            else {
+                Toast.makeText(this,getString(R.string.failed_to_add_device),Toast.LENGTH_LONG).show();
             }
         }
         if(requestCode == bleRequestCode) {

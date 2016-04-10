@@ -6,4 +6,6 @@
     <string name="add_sensor">Add a New Sensor</string>
     <string name="no_bluetooth">Bluetooth is required to work</string>
     <string name="unknown_device">Unknown device</string>
+    <string name="scanning_for_devices">Scanning for Devices</string>
+    <string name="failed_to_add_device">Failed to Add Device</string>
 </resources>

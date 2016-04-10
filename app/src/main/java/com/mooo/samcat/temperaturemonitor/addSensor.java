@@ -9,7 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import java.lang.annotation.Documented;
 import java.util.ArrayList;
+
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -18,8 +22,9 @@ import android.widget.TextView;
 import android.widget.ListView;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
-public class addSensor extends ListActivity {
+public class addSensor extends AppCompatActivity {
 
     private String[] returnValues;
     private Intent data;
@@ -30,42 +35,50 @@ public class addSensor extends ListActivity {
     private ArrayList<BluetoothDevice> mLeDevices;
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private static final int REQUEST_ENABLE_BT = 1;
+    private boolean sensorAdded;
 
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Initializes Bluetooth adapter.
-        final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
-        data = new Intent(); //sensor data to return
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_sensor);
+        //setTitle(getString(R.string.add_sensor));
+
+        // Initializes Bluetooth adapter.
+        //final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        //mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        //Toast.makeText(this,"On Create Called",Toast.LENGTH_SHORT).show();
+        //data = new Intent(); //sensor data to return
         //getActionBar().setTitle(R.string.add_sensor);
         //setContentView(R.layout.activity_add_sensor);
-        Intent intent = getIntent();
-        mHandler = new Handler();
-
-        //mLeDeviceListAdapter.clear();
-        scanLeDevice(true);
+        //Intent intent = getIntent();
+        //mHandler = new Handler();
+        sensorAdded = false;
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         if (!mScanning) {
         } else {
-            menu.findItem(R.id.menu_refresh).setActionView(R.layout.actionbar_indeterminate_progress);
+            menu.findItem(R.id.addSensor_refreshButton).setActionView(R.layout.actionbar_indeterminate_progress);
         }
+        //mLeDeviceListAdapter.clear();
+        scanLeDevice(true);
+        Toast.makeText(this,"Scan Started", Toast.LENGTH_SHORT).show();
         return true;
-    }
+    }*/
 
     @Override
     public void finish() {
-        if (getParent() == null) {
-            setResult(Activity.RESULT_OK, data);
-        }
         setResult(Activity.RESULT_CANCELED);
+        if (getParent() == null) {
+            if(sensorAdded) {
+                setResult(Activity.RESULT_OK, data);
+            }
+        }
         super.finish();
     }
 
@@ -86,7 +99,7 @@ public class addSensor extends ListActivity {
         }
         // Initializes list view adapter.
         mLeDeviceListAdapter = new LeDeviceListAdapter();
-        setListAdapter(mLeDeviceListAdapter);
+        //setListAdapter(mLeDeviceListAdapter);
         scanLeDevice(true);
     }
 
