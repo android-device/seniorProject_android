@@ -22,7 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".addSensor"></activity>
     </application>
 
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true"/>

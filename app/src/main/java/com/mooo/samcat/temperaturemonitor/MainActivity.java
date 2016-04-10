@@ -130,8 +130,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void start_addSensor(View view) {
-        Intent intent = new Intent(this, addSensor.class);
-        startActivityForResult(intent,dataBaseRequestCode);
+        //Intent intent = new Intent(this, addSensor.class);
+        //startActivityForResult(intent,dataBaseRequestCode);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data){
@@ -150,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
             if(resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(this,getString(R.string.no_bluetooth),Toast.LENGTH_SHORT).show();
                 finish();
-                return;
             }
         }
     }
