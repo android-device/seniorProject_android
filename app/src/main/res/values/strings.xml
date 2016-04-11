@@ -9,4 +9,5 @@
     <string name="scanning_for_devices">Scanning for Devices</string>
     <string name="failed_to_add_device">Failed to Add Device</string>
     <string name="title_activity_add_sensor">addSensor</string>
+    <string name="refreshing_sensors">Refreshing...</string>
 </resources>

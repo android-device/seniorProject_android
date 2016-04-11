@@ -32,9 +32,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView userMessage;
     private TextView contentMessage;
 
+    //Activity Request Codes
     private final static int dataBaseRequestCode = 1;
-    private final static int bleRequestCode = 2;
-
+    private static int bleRequestCode = 2;
 
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -97,8 +97,12 @@ public class MainActivity extends AppCompatActivity {
         }
         Log.d("STATE","end!");
 
-        // Ensures Bluetooth is available on the device and it is enabled. If not,
-// displays a dialog requesting user permission to enable Bluetooth.
+        checkBluetooth();
+    }
+
+    public void checkBluetooth() {
+        /* Ensures Bluetooth is available on the device and it is enabled. If not,
+        displays a dialog requesting user permission to enable Bluetooth. */
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -151,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this,getString(R.string.no_bluetooth),Toast.LENGTH_SHORT).show();
                 finish();
             }
+        } else { //Don't recurse...
+            checkBluetooth();
         }
     }
 }
