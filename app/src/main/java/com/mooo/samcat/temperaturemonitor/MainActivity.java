@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,6 +22,9 @@ import android.view.MenuItem;
 import android.database.Cursor;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.Manifest;
+
+//import java.util.jar.Manifest;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,32 +44,27 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothAdapter mBluetoothAdapter;
 
     protected void onCreate(Bundle savedInstanceState) {
-        // Initializes Bluetooth adapter.
+        /*Initializes Bluetooth adapter*/
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        /*Setup UI*/
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-
+        //userMessage.setTextSize(0);
         userMessage = (TextView) findViewById(R.id.main_message);
         contentMessage = (TextView) findViewById(R.id.placeholder);
-
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(getString(R.string.sensor_headings));
 
-        //Get saved sensors
+        /*Setup Database*/
         sDbHelper = new SensorReaderDbHelper(this);
-        Log.d("STATE","past dbHelper");
         dbRead = sDbHelper.getReadableDatabase();
         dbWrite = sDbHelper.getWritableDatabase();
         valuesToAdd_db = new ContentValues();
-        Log.d("STATE","past getReadable");
-
         String[] projection = {
                 SavedSensorsContract.SensorEntry._ID,
                 SavedSensorsContract.SensorEntry.SENSOR_ID,
@@ -73,10 +72,6 @@ public class MainActivity extends AppCompatActivity {
                 SavedSensorsContract.SensorEntry.SENSOR_BATTERY,
                 SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE
         };
-        Log.d("STATE","past projection");
-
-        //String sortOrder = SavedSensorsContract.SensorEntry._COUNT + "DESC";
-        Log.d("STATE","past sort");
 
         Cursor c = dbRead.query(
                 SavedSensorsContract.SensorEntry.TABLE_NAME, //table to query
@@ -87,16 +82,12 @@ public class MainActivity extends AppCompatActivity {
                 null,
                 null //no sort
         );
-        Log.d("STATE","past query");
 
         if(c.moveToFirst()) { //There are Sensors in the database
-            Log.d("STATE", "past toast");
-        }
-        else { //No Sensors in the database
+        } else { //No Sensors in the database
             userMessage.setTextSize((int)this.getResources().getDimension(R.dimen.message_text_size));
             userMessage.setText(getString(R.string.no_sensors));
         }
-        Log.d("STATE","end!");
 
         checkBluetooth();
     }

@@ -37,6 +37,7 @@ public class addSensor extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         mHandler = new Handler();
         devices = new ArrayList<sensor>();
+        setTitle(getString(R.string.title_activity_add_sensor));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_sensor);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -59,7 +60,7 @@ public class addSensor extends AppCompatActivity {
         });*/
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
-        //refreshClicked(null);
+        refreshClicked(null);
     }
 
     public void refreshClicked(View view) {
@@ -124,7 +125,8 @@ public class addSensor extends AppCompatActivity {
                             newSensor.setName(device.getName());
                             newSensor.setUUID(device.getAddress());
                             devices.add(newSensor);
-                            placeholderText2.setText(placeholderText.getText());
+                            placeholderText2.setText(device.getAddress());
+                            //placeholderText2.setText(placeholderText.getText());
                             placeholderText.setText(device.getName());
                         }
                     });
