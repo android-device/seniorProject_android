@@ -116,20 +116,33 @@ public class addSensor extends AppCompatActivity {
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
                 @Override
-                public void onLeScan(final BluetoothDevice device, int rssi,
-                                     byte[] scanRecord) {
+                public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            sensor newSensor = new sensor();
-                            newSensor.setName(device.getName());
-                            newSensor.setUUID(device.getAddress());
-                            devices.add(newSensor);
-                            placeholderText2.setText(device.getAddress());
-                            //placeholderText2.setText(placeholderText.getText());
-                            placeholderText.setText(device.getName());
+                            interpretBleDevice(device);
+                            byte[] serviceUuidBytes = new byte[16];
+                            String serviceUuid = "";
+                            for (int i = 0; i < scanRecord.length; i++) {
+                                serviceUuidBytes[i] = scanRecord[i];
+                            }
+                            serviceUuid = bytesToHex(serviceUuidBytes);
                         }
                     });
                 }
             };
+
+    private void interpretBleDevice(BluetoothDevice device) {
+        sensor newSensor = new sensor();
+        newSensor.setName(device.getName());
+        newSensor.setUUID(device.getAddress());
+        devices.add(newSensor);
+        placeholderText2.setText(device.getAddress());
+        //placeholderText2.setText(placeholderText.getText());
+        if(device.getUuids() != null) {
+            placeholderText.setText(device.getUuids()[0].getUuid().toString());
+        } else {
+            Toast.makeText(this,"NULL UUID",Toast.LENGTH_SHORT).show();
+        }
+    }
 }
