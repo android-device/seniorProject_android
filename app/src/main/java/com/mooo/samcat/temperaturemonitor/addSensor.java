@@ -120,29 +120,43 @@ public class addSensor extends AppCompatActivity {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            interpretBleDevice(device);
-                            byte[] serviceUuidBytes = new byte[16];
+                            byte[] serviceUuidBytes = new byte[scanRecord.length];
                             String serviceUuid = "";
-                            for (int i = 0; i < scanRecord.length; i++) {
-                                serviceUuidBytes[i] = scanRecord[i];
+                            if(scanRecord != null) {
+                                for (int i = 0; i < scanRecord.length; i++) {
+                                    serviceUuidBytes[i] = scanRecord[i];
+                                }
+                                serviceUuid = bytesToHex(serviceUuidBytes);
                             }
-                            serviceUuid = bytesToHex(serviceUuidBytes);
+                            interpretBleDevice(device,serviceUuid);
                         }
                     });
                 }
             };
 
-    private void interpretBleDevice(BluetoothDevice device) {
+    private void interpretBleDevice(BluetoothDevice device,String uuidInfo) {
         sensor newSensor = new sensor();
         newSensor.setName(device.getName());
         newSensor.setUUID(device.getAddress());
         devices.add(newSensor);
-        placeholderText2.setText(device.getAddress());
-        //placeholderText2.setText(placeholderText.getText());
-        if(device.getUuids() != null) {
+        placeholderText.setText(device.getAddress());
+        placeholderText2.setText(uuidInfo);
+        /*if(device.getUuids() != null) {
             placeholderText.setText(device.getUuids()[0].getUuid().toString());
         } else {
             Toast.makeText(this,"NULL UUID",Toast.LENGTH_SHORT).show();
+        }*/
+    }
+
+    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
+    public String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for(int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
+        return new String(hexChars);
     }
 }
