@@ -20,9 +20,13 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.database.Cursor;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
+
+import java.util.ArrayList;
+import java.util.List;
 
 //import java.util.jar.Manifest;
 
@@ -36,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     public final static String EXTRA_DB = "com.mooo.samcat.temperaturemonitor.db";
     private TextView userMessage;
     private TextView contentMessage;
+    public static List<sensor> savedDevices = new ArrayList<sensor>();
 
     //Activity Request Codes
     private final static int dataBaseRequestCode = 1;
@@ -68,8 +73,7 @@ public class MainActivity extends AppCompatActivity {
         String[] projection = {
                 SavedSensorsContract.SensorEntry._ID,
                 SavedSensorsContract.SensorEntry.SENSOR_ID,
-                SavedSensorsContract.SensorEntry.SENSOR_VALUE,
-                SavedSensorsContract.SensorEntry.SENSOR_BATTERY,
+                SavedSensorsContract.SensorEntry.SENSOR_ADDRESS,
                 SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE
         };
 
@@ -129,18 +133,19 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private Intent addSensorIntent;
+
     public void start_addSensor(View view) {
-        Intent intent = new Intent(this, addSensor.class);
-        startActivityForResult(intent,dataBaseRequestCode);
+        addSensorIntent = new Intent(this, addSensor.class);
+        startActivityForResult(addSensorIntent, dataBaseRequestCode);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if(requestCode == dataBaseRequestCode) {
             if (resultCode == RESULT_OK) {
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ID, data.getStringExtra("sensorID"));
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, data.getStringExtra("sensorHuman"));
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_BATTERY, "100");
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_VALUE, "0");
+                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ID, addSensorIntent.getStringExtra("sensorID"));
+                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, addSensorIntent.getStringExtra("sensorName"));
+                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS, addSensorIntent.getStringExtra("sensorAddress"));
             }
             else {
                 Toast.makeText(this,getString(R.string.failed_to_add_device),Toast.LENGTH_LONG).show();
@@ -154,5 +159,13 @@ public class MainActivity extends AppCompatActivity {
         } else { //Don't recurse...
             checkBluetooth();
         }
+    }
+
+    public static boolean checkForDuplicateDevice(sensor item) {
+        for(int i = 0; i < savedDevices.size(); i++) {
+            if(savedDevices.get(i).getAddress().equals(item.getAddress())) //already in saved devices
+                return false;
+        }
+        return  true;
     }
 }

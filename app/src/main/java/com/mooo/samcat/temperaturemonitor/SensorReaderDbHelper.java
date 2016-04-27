@@ -15,8 +15,7 @@ public class SensorReaderDbHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + SavedSensorsContract.SensorEntry.TABLE_NAME + " (" +
                     SavedSensorsContract.SensorEntry._ID + " INTEGER PRIMARY KEY," +
                     SavedSensorsContract.SensorEntry.SENSOR_ID + TEXT_TYPE + COMMA_SEP +
-                    SavedSensorsContract.SensorEntry.SENSOR_VALUE + TEXT_TYPE + COMMA_SEP +
-                    SavedSensorsContract.SensorEntry.SENSOR_BATTERY + TEXT_TYPE + COMMA_SEP +
+                    SavedSensorsContract.SensorEntry.SENSOR_ADDRESS + TEXT_TYPE + COMMA_SEP +
                     SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE + TEXT_TYPE +
                     " )";
     private static final String SQL_DELETE_ENTRIES =

@@ -11,4 +11,8 @@
     <string name="title_activity_add_sensor">Add Sensor</string>
     <string name="refreshing_sensors">Refreshing...</string>
     <string name="ble_not_supported">Device does not support Bluetooth Low Energy</string>
+    <string name="temp_label">Temperature:</string>
+    <string name="batt_label">Battery:</string>
+    <string name="id_label">Identifier:</string>
+    <string name="name_input">Enter a name for this device</string>
 </resources>

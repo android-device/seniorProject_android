@@ -15,8 +15,7 @@ public class SavedSensorsContract {
     public static abstract class SensorEntry implements BaseColumns {
         public static final String TABLE_NAME = "sensor";
         public static final String SENSOR_ID = "sensorId";
-        public static final String SENSOR_VALUE = "sensorValue";
-        public static final String SENSOR_BATTERY = "sensorBattery";
+        public static final String SENSOR_ADDRESS = "sensorAddress";
         public static final String SENSOR_HUMANREADABLE = "sensorHumanReadable";
     }
 

@@ -4,55 +4,94 @@ package com.mooo.samcat.temperaturemonitor;
  * Created by rodrigo on 4/12/16.
  */
 public class sensor {
-    private String name;
-    private float temperature;
-    private float prevTemperature;
-    private String UUID;
+    private String name; //human given name
+    private int temperature;
+    private int prevTemperature;
+    private String address; //Bluetooth address
+    private String deviceID; //assigned device ID
+    private float battery;
 
-    public sensor(String newName, float newTemperature, String newUUID) {
+    public sensor(String newName, int newTemperature, String newAddress) {
         this.name = newName;
         this.temperature = newTemperature;
         this.prevTemperature = 0;
-        this.UUID = newUUID;
+        this.address = newAddress;
     }
 
     public sensor() {
         this.name = "";
         this.temperature = 0;
         this.prevTemperature = 0;
-        this.UUID = "";
+        this.address = "";
+        deviceID = "";
+        battery = 0;
     }
 
     public String getName() {
-        return this.name;
+        if(this.name.equals(""))
+            return this.deviceID;
+        else
+            return this.name;
     }
 
-    public float getTemperature() {
+    public int getTemperature() {
         return this.temperature;
     }
 
-    public float getPrevTemperature() {
+    public int getPrevTemperature() {
         return this.prevTemperature;
     }
 
-    public String getUUID() {
-        return this.UUID;
+    public float getBattery() {
+        return this.battery;
+    }
+
+    public String getAddress() {
+        return this.address;
+    }
+
+    public String getDeviceID() {
+        return this.deviceID;
     }
 
     public void setName(String newName) {
         this.name = newName;
     }
 
-    public void setTemperature(float newTemp) {
+    private void setTemperature(int newTemp) {
         this.prevTemperature = this.temperature;
         this.temperature = newTemp;
     }
 
-    public void setPrevTemperature(float newTemp) { //Can only be set by setting a new temperature
-        return;
+    private void setPrevTemperature(float newTemp) {return;} //Cannot be manually set!
+
+    public void setAddress(String newAddress) {
+        this.address = newAddress;
     }
 
-    public void setUUID(String newUUID) {
-        this.UUID = newUUID;
+    private void setBattery(float newBattery) {this.battery = newBattery;}
+
+    private void setDeviceID(String newID) {this.deviceID = newID;}
+
+    public void setData(String bleReadData) { //update values using data read from ibeacon
+        String temperature = bleReadData.substring(50, 52);
+        String battery = bleReadData.substring(52,53);
+
+        setTemperature(hex2decimal(temperature));
+        float tempBattery = (float)hex2decimal(battery)/(float)hex2decimal("F");
+        setBattery(tempBattery);
+        setDeviceID(bleReadData.substring(53,58));
+    }
+
+    private int hex2decimal(String s) {
+        String digits = "0123456789ABCDEF";
+         s = s.toUpperCase();
+         int val = 0;
+         for (int i = 0; i < s.length(); i++) {
+             char c = s.charAt(i);
+             int d = digits.indexOf(c);
+             val = 16*val + d;
+         }
+         return val;
     }
 }

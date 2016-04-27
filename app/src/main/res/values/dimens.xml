@@ -7,4 +7,6 @@
     <dimen name="title_text_size">15pt</dimen>
     <dimen name="message_text_size">5pt</dimen>
     <integer name="message_text_size">5</integer>
+    <dimen name="text_margin">16dp</dimen>
+    <dimen name="small_text_margin">8dp</dimen>
 </resources>
