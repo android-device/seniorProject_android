@@ -34,7 +34,7 @@ import java.util.List;
 
 //import java.util.logging.Handler;
 
-public class addSensor extends AppCompatActivity implements sensorItemFragment.OnListFragmentInteractionListener {
+public class addSensor extends AppCompatActivity implements OnListFragmentInteractionListener {
     private static int bleRequestCode = 2;
     private static final long SCAN_PERIOD = 100000;
     private boolean mScanning;
@@ -174,8 +174,7 @@ public class addSensor extends AppCompatActivity implements sensorItemFragment.O
     private String enteredName = "";
     private sensor sensorToReturn;
 
-    public void onListFragmentInteraction(final sensor item) {
-
+    public void OnListFragmentInteraction(final sensor item) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(getString(R.string.name_input));
         final EditText input = new EditText(this);

@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/mainSensorItemFragment"
-            android:name="com.mooo.samcat.temperaturemonitor.sensorItemFragment"
-            tools:layout="@layout/fragment_sensoritem_list" />
+            android:name="com.mooo.samcat.temperaturemonitor.mainSensorItemFragment"
+            tools:layout="@layout/fragment_mainsensoritem_list" />
     </LinearLayout>
 </RelativeLayout>

@@ -9,6 +9,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.Fragment;
+
 
 //import com.mooo.samcat.temperaturemonitor.dummy.DummyContent;
 //import com.mooo.samcat.temperaturemonitor.dummy.DummyContent.DummyItem;
@@ -17,14 +22,14 @@ import android.view.ViewGroup;
 /**
  * A fragment representing a list of Items.
  * <p/>
- * Activities containing this fragment MUST implement the {@link OnMainListFragmentInteractionListener}
+ * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
 public class mainSensorItemFragment extends Fragment {
 
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
-    private OnMainListFragmentInteractionListener mListener;
+    private OnListFragmentInteractionListener mListener;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -74,8 +79,8 @@ public class mainSensorItemFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnMainListFragmentInteractionListener) {
-            mListener = (OnMainListFragmentInteractionListener) context;
+        if (context instanceof OnListFragmentInteractionListener) {
+            mListener = (OnListFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
@@ -88,17 +93,5 @@ public class mainSensorItemFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnMainListFragmentInteractionListener {
-        void onListFragmentInteraction(sensor item);
-    }
+
 }

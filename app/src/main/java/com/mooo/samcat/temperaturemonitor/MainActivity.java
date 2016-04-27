@@ -27,13 +27,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.Manifest;
+import android.support.v4.app.Fragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
 //import java.util.jar.Manifest;
 
-public class MainActivity extends AppCompatActivity implements mainSensorItemFragment.OnMainListFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements OnListFragmentInteractionListener {
 
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private SensorReaderDbHelper sDbHelper;
@@ -51,8 +52,16 @@ public class MainActivity extends AppCompatActivity implements mainSensorItemFra
 
     private BluetoothAdapter mBluetoothAdapter;
 
+    private String[] projection = {
+            SavedSensorsContract.SensorEntry._ID,
+            SavedSensorsContract.SensorEntry.SENSOR_ID,
+            SavedSensorsContract.SensorEntry.SENSOR_ADDRESS,
+            SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE
+    };
+
     protected void onCreate(Bundle savedInstanceState) {
         /*Initializes Bluetooth adapter*/
+        mHandler = new Handler();
         final BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
 
@@ -72,12 +81,6 @@ public class MainActivity extends AppCompatActivity implements mainSensorItemFra
         dbRead = sDbHelper.getReadableDatabase();
         dbWrite = sDbHelper.getWritableDatabase();
         valuesToAdd_db = new ContentValues();
-        String[] projection = {
-                SavedSensorsContract.SensorEntry._ID,
-                SavedSensorsContract.SensorEntry.SENSOR_ID,
-                SavedSensorsContract.SensorEntry.SENSOR_ADDRESS,
-                SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE
-        };
 
         Cursor c = dbRead.query(
                 SavedSensorsContract.SensorEntry.TABLE_NAME, //table to query
@@ -90,12 +93,16 @@ public class MainActivity extends AppCompatActivity implements mainSensorItemFra
         );
 
         if(c.moveToFirst()) { //There are Sensors in the database
+            sensor newSensor = new sensor(c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE)),
+                    c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
+                    c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
+            savedDevices.add(newSensor);
         } else { //No Sensors in the database
             userMessage.setTextSize((int)this.getResources().getDimension(R.dimen.message_text_size));
             userMessage.setText(getString(R.string.no_sensors));
         }
 
-        checkBluetooth();
+        scheduleRefresh();
     }
 
     public void checkBluetooth() {
@@ -154,6 +161,9 @@ public class MainActivity extends AppCompatActivity implements mainSensorItemFra
                 valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS, newAddress);
                 sensor newSensor = new sensor(newName, newID, newAddress);
                 savedDevices.add(newSensor);
+                sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
+                dbWrite.insert(SavedSensorsContract.SensorEntry.TABLE_NAME, null, valuesToAdd_db);
+                refreshSensors();
             }
             else {
                 Toast.makeText(this,getString(R.string.failed_to_add_device),Toast.LENGTH_LONG).show();
@@ -178,6 +188,7 @@ public class MainActivity extends AppCompatActivity implements mainSensorItemFra
     }
 
     private void refreshSensors() {
+        userMessage.setTextSize(0);
         checkBluetooth(); //hasn't been disabled, right???
         scanLeDevice(true);
     }
@@ -256,7 +267,26 @@ public class MainActivity extends AppCompatActivity implements mainSensorItemFra
         return false;
     }
 
-        public void onMainListFragmentInteraction(final sensor item) {
+    private final int DELAY = 7500;
+    private Handler nHandler = new Handler();
+    public void scheduleRefresh() {
+        nHandler.postDelayed(new Runnable() {
+            public void run() {
+                refreshSensors();          // this method will contain your almost-finished HTTP calls
+                nHandler.postDelayed(this, DELAY);
+            }
+        }, DELAY);
+    }
 
-        }
+    @Override
+    public void OnListFragmentInteraction(sensor item) {
+        refreshSensors();
+    }
+
+    /*@Override
+    public void onListFragmentInteraction(sensor item) {
+        int j = 1;
+        j++;
+        System.out.println("j" + j);
+    }*/
 }

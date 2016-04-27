@@ -5,9 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.mooo.samcat.temperaturemonitor.sensorItemFragment.OnListFragmentInteractionListener;
-
 import java.util.List;
 
 //import com.mooo.samcat.temperaturemonitor.dummy.DummyContent.DummyItem;
@@ -20,9 +17,9 @@ import java.util.List;
 public class mainMysensorItemRecyclerViewAdapter extends RecyclerView.Adapter<mainMysensorItemRecyclerViewAdapter.ViewHolder> {
 
     private final List<sensor> mValues;
-    private final mainSensorItemFragment.OnMainListFragmentInteractionListener mListener;
+    private final OnListFragmentInteractionListener mListener;
 
-    public mainMysensorItemRecyclerViewAdapter(List<sensor> items, mainSensorItemFragment.OnMainListFragmentInteractionListener listener) {
+    public mainMysensorItemRecyclerViewAdapter(List<sensor> items, OnListFragmentInteractionListener listener) {
         mValues = items;
         mListener = listener;
     }
@@ -47,7 +44,7 @@ public class mainMysensorItemRecyclerViewAdapter extends RecyclerView.Adapter<ma
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    mListener.OnListFragmentInteraction(holder.mItem);
                 }
             }
         });
