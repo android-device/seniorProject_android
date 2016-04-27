@@ -2,6 +2,7 @@ package com.mooo.samcat.temperaturemonitor;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,11 +10,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
@@ -30,7 +33,7 @@ import java.util.List;
 
 //import java.util.jar.Manifest;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements mainSensorItemFragment.OnMainListFragmentInteractionListener {
 
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private SensorReaderDbHelper sDbHelper;
@@ -61,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         //userMessage.setTextSize(0);
         userMessage = (TextView) findViewById(R.id.main_message);
-        contentMessage = (TextView) findViewById(R.id.placeholder);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(getString(R.string.sensor_headings));
 
@@ -143,9 +145,15 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data){
         if(requestCode == dataBaseRequestCode) {
             if (resultCode == RESULT_OK) {
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ID, addSensorIntent.getStringExtra("sensorID"));
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, addSensorIntent.getStringExtra("sensorName"));
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS, addSensorIntent.getStringExtra("sensorAddress"));
+                String newName = data.getStringExtra("sensorName");
+                String newID = data.getStringExtra("sensorID");
+                String newAddress = data.getStringExtra("sensorAddress");
+
+                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ID, newID);
+                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, newName);
+                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS, newAddress);
+                sensor newSensor = new sensor(newName, newID, newAddress);
+                savedDevices.add(newSensor);
             }
             else {
                 Toast.makeText(this,getString(R.string.failed_to_add_device),Toast.LENGTH_LONG).show();
@@ -168,4 +176,87 @@ public class MainActivity extends AppCompatActivity {
         }
         return  true;
     }
+
+    private void refreshSensors() {
+        checkBluetooth(); //hasn't been disabled, right???
+        scanLeDevice(true);
+    }
+
+    private Handler mHandler;
+    private boolean mScanning;
+    private static final long SCAN_PERIOD = 100000;
+    private void scanLeDevice(final boolean enable) {
+        if (enable) {
+            // Stops scanning after a pre-defined scan period.
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mScanning = false;
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                }
+            }, SCAN_PERIOD);
+
+            mScanning = true;
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        } else {
+            mScanning = false;
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+    }
+
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi, final byte[] scanRecord) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            byte[] serviceUuidBytes = new byte[scanRecord.length];
+                            String serviceUuid = "";
+                            if(scanRecord != null) {
+                                for (int i = 0; i < scanRecord.length; i++) {
+                                    serviceUuidBytes[i] = scanRecord[i];
+                                }
+                                serviceUuid = bytesToHex(serviceUuidBytes);
+                            }
+                            interpretBleDevice(device,serviceUuid);
+                        }
+                    });
+                }
+            };
+
+    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+
+    public String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for(int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
+    public static RecyclerView sensorItemFragmentRecyclerView;
+    private void interpretBleDevice(BluetoothDevice device,String uuidInfo) {
+        if(validateDevice(device.getAddress())) {
+            savedDevices.get(sensorAt).setTemp_batt(uuidInfo);
+            sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
+        }
+    }
+
+    private int sensorAt;
+    private boolean validateDevice(String address) {
+        for(int i=0; i<savedDevices.size(); i++) {
+            if(savedDevices.get(i).getAddress().equals(address)) { //found a matching saved sensor!
+                sensorAt = i;
+                return true; //good device!
+            }
+        }
+        return false;
+    }
+
+        public void onMainListFragmentInteraction(final sensor item) {
+
+        }
 }

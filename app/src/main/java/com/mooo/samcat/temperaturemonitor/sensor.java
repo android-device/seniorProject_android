@@ -11,9 +11,10 @@ public class sensor {
     private String deviceID; //assigned device ID
     private float battery;
 
-    public sensor(String newName, int newTemperature, String newAddress) {
+    public sensor(String newName, String newID, String newAddress) {
         this.name = newName;
-        this.temperature = newTemperature;
+        this.deviceID = newID;
+        this.temperature = 0;
         this.prevTemperature = 0;
         this.address = newAddress;
     }
@@ -81,6 +82,15 @@ public class sensor {
         float tempBattery = (float)hex2decimal(battery)/(float)hex2decimal("F");
         setBattery(tempBattery);
         setDeviceID(bleReadData.substring(53,58));
+    }
+
+    public void setTemp_batt(String bleReadData) {
+        String temperature = bleReadData.substring(50, 52);
+        String battery = bleReadData.substring(52,53);
+
+        setTemperature(hex2decimal(temperature));
+        float tempBattery = (float)hex2decimal(battery)/(float)hex2decimal("F");
+        setBattery(tempBattery);
     }
 
     private int hex2decimal(String s) {

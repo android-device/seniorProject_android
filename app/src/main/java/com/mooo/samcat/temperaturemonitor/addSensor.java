@@ -36,7 +36,7 @@ import java.util.List;
 
 public class addSensor extends AppCompatActivity implements sensorItemFragment.OnListFragmentInteractionListener {
     private static int bleRequestCode = 2;
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 100000;
     private boolean mScanning;
     private Handler mHandler;
     public static final List<sensor> devices = new ArrayList<sensor>();
@@ -181,23 +181,13 @@ public class addSensor extends AppCompatActivity implements sensorItemFragment.O
         final EditText input = new EditText(this);
         input.setInputType(InputType.TYPE_CLASS_TEXT);
         builder.setView(input);
+        sensorToReturn = item;
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 enteredName = input.getText().toString();
-                setResult(RESULT_OK);
-                Intent data = new Intent();
-                item.setName(enteredName);
-                data.putExtra("sensorID",item.getDeviceID());
-                data.putExtra("sensorAddress",item.getAddress());
-                data.putExtra("sensorName",item.getName());
-                if (getParent() == null) {
-                    setResult(RESULT_OK, data);
-                } else {
-                    getParent().setResult(RESULT_OK, data);
-                }
-                finish();
+                close();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -208,5 +198,20 @@ public class addSensor extends AppCompatActivity implements sensorItemFragment.O
         });
 
         builder.show();
+    }
+
+    private void close() {
+        setResult(RESULT_OK);
+        Intent data = this.getIntent();
+        sensorToReturn.setName(enteredName);
+        data.putExtra("sensorID", sensorToReturn.getDeviceID());
+        data.putExtra("sensorAddress", sensorToReturn.getAddress());
+        data.putExtra("sensorName", sensorToReturn.getName());
+        if (getParent() == null) {
+            setResult(RESULT_OK, data);
+        } else {
+            getParent().setResult(RESULT_OK, data);
+        }
+        finish();
     }
 }
