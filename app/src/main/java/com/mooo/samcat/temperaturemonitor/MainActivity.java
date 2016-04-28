@@ -97,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
                     c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
                     c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
             savedDevices.add(newSensor);
+            userMessage.setTextSize(0);
         } else { //No Sensors in the database
             userMessage.setTextSize((int)this.getResources().getDimension(R.dimen.message_text_size));
             userMessage.setText(getString(R.string.no_sensors));
@@ -163,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
                 savedDevices.add(newSensor);
                 sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
                 dbWrite.insert(SavedSensorsContract.SensorEntry.TABLE_NAME, null, valuesToAdd_db);
+                userMessage.setTextSize(0);
                 refreshSensors();
             }
             else {
@@ -188,7 +190,6 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
     }
 
     private void refreshSensors() {
-        userMessage.setTextSize(0);
         checkBluetooth(); //hasn't been disabled, right???
         scanLeDevice(true);
     }
