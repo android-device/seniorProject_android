@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">Temperature Monitor</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Notification Settings</string>
     <string name="sensor_headings">Saved Sensors</string>
     <string name="no_sensors">No sensors added, add some using the button above.</string>
     <string name="add_sensor">Add a New Sensor</string>
@@ -15,4 +15,6 @@
     <string name="batt_label">Battery:</string>
     <string name="id_label">Identifier:</string>
     <string name="name_input">Enter a name for this device</string>
+    <string name="title_activity_notification_manager">Manage Notification Thresholds</string>
+    <string name="add_notification_threshold">Add Notification Threshold</string>
 </resources>

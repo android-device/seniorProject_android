@@ -13,21 +13,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.database.Cursor;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.Manifest;
-import android.support.v4.app.Fragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,26 +31,38 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements OnListFragmentInteractionListener {
 
     private CollapsingToolbarLayout collapsingToolbarLayout;
-    private SensorReaderDbHelper sDbHelper;
-    private SQLiteDatabase dbRead;
-    private SQLiteDatabase dbWrite;
-    private ContentValues valuesToAdd_db;
+
+    private SensorReaderDbHelper sensor_sDbHelper;
+    private ThresholdReaderDbHelper threshold_sDbHelper;
+
+    private SQLiteDatabase sensor_dbRead;
+    private SQLiteDatabase sensor_dbWrite;
+    private SQLiteDatabase threshold_dbRead;
+
+    private ContentValues sensor_valuesToAdd_db;
+
     public final static String EXTRA_DB = "com.mooo.samcat.temperaturemonitor.db";
     private TextView userMessage;
-    private TextView contentMessage;
+
     public static List<sensor> savedDevices = new ArrayList<sensor>();
+    public static List<Integer> thresholds = new ArrayList<Integer>();
 
     //Activity Request Codes
-    private final static int dataBaseRequestCode = 1;
-    private static int bleRequestCode = 2;
+    private final static int dataBase_RequestCode = 1;
+    private final static int ble_RequestCode = 2;
+    private final static int settings_RequestCode = 3;
 
     private BluetoothAdapter mBluetoothAdapter;
 
-    private String[] projection = {
+    private String[] sensor_projection = {
             SavedSensorsContract.SensorEntry._ID,
             SavedSensorsContract.SensorEntry.SENSOR_ID,
             SavedSensorsContract.SensorEntry.SENSOR_ADDRESS,
             SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE
+    };
+    private String[] threshold_projection = {
+            SavedThresholdsContract.ThresholdEntry._ID,
+            SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE
     };
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,15 +82,26 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(getString(R.string.sensor_headings));
 
-        /*Setup Database*/
-        sDbHelper = new SensorReaderDbHelper(this);
-        dbRead = sDbHelper.getReadableDatabase();
-        dbWrite = sDbHelper.getWritableDatabase();
-        valuesToAdd_db = new ContentValues();
+        /*Setup Databases*/
+        sensor_sDbHelper = new SensorReaderDbHelper(this);
+        sensor_dbRead = sensor_sDbHelper.getReadableDatabase();
+        sensor_dbWrite = sensor_sDbHelper.getWritableDatabase();
+        sensor_valuesToAdd_db = new ContentValues();
+        threshold_sDbHelper = new ThresholdReaderDbHelper(this);
+        threshold_dbRead = threshold_sDbHelper.getReadableDatabase();
 
-        Cursor c = dbRead.query(
+        Cursor sensor_cursor = sensor_dbRead.query(
                 SavedSensorsContract.SensorEntry.TABLE_NAME, //table to query
-                projection, //columns to return
+                sensor_projection, //columns to return
+                null,
+                null,
+                null,
+                null,
+                null //no sort
+        );
+        Cursor threshold_cursor = threshold_dbRead.query(
+                SavedThresholdsContract.ThresholdEntry.TABLE_NAME,
+                threshold_projection,
                 null,
                 null,
                 null,
@@ -92,22 +109,30 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
                 null //no sort
         );
 
-        if(c.moveToFirst()) { //There are Sensors in the database
-            sensor newSensor = new sensor(c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE)),
-                    c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
-                    c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
+        if(sensor_cursor.moveToFirst()) { //There are Sensors in the database
+            sensor newSensor = new sensor(sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE)),
+                    sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
+                    sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
             savedDevices.add(newSensor);
-            while(!c.isLast()) { //Iterate through the database and load every device
-                c.moveToNext();
-                newSensor = new sensor(c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE)),
-                        c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
-                        c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
+            while(!sensor_cursor.isLast()) { //Iterate through the database and load every device
+                sensor_cursor.moveToNext();
+                newSensor = new sensor(sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE)),
+                        sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
+                        sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
                 savedDevices.add(newSensor);
             }
             sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged(); //display
+            userMessage.setTextSize(0); //Hide "no sensors message"
         } else { //No Sensors in the database
             userMessage.setTextSize((int)this.getResources().getDimension(R.dimen.message_text_size));
             userMessage.setText(getString(R.string.no_sensors));
+        }
+
+        if(threshold_cursor.moveToFirst()) { //there are thresholds in the database
+            thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
+            while(!threshold_cursor.isLast()) {
+                thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
+            }
         }
 
         scheduleRefresh();
@@ -119,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, bleRequestCode);
+                startActivityForResult(enableBtIntent, ble_RequestCode);
             }
         }
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
@@ -154,30 +179,30 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
 
     public void start_addSensor(View view) {
         addSensorIntent = new Intent(this, addSensor.class);
-        startActivityForResult(addSensorIntent, dataBaseRequestCode);
+        startActivityForResult(addSensorIntent, dataBase_RequestCode);
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(requestCode == dataBaseRequestCode) {
+        if(requestCode == dataBase_RequestCode) {
             if (resultCode == RESULT_OK) {
                 String newName = data.getStringExtra("sensorName");
                 String newID = data.getStringExtra("sensorID");
                 String newAddress = data.getStringExtra("sensorAddress");
 
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ID, newID);
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, newName);
-                valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS, newAddress);
+                sensor_valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ID, newID);
+                sensor_valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, newName);
+                sensor_valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS, newAddress);
                 sensor newSensor = new sensor(newName, newID, newAddress);
                 savedDevices.add(newSensor);
                 sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
-                dbWrite.insert(SavedSensorsContract.SensorEntry.TABLE_NAME, null, valuesToAdd_db);
+                sensor_dbWrite.insert(SavedSensorsContract.SensorEntry.TABLE_NAME, null, sensor_valuesToAdd_db);
                 refreshSensors();
             }
             else {
                 Toast.makeText(this,getString(R.string.failed_to_add_device),Toast.LENGTH_LONG).show();
             }
         }
-        if(requestCode == bleRequestCode) {
+        if(requestCode == ble_RequestCode) {
             if(resultCode == Activity.RESULT_CANCELED) {
                 Toast.makeText(this,getString(R.string.no_bluetooth),Toast.LENGTH_SHORT).show();
                 finish();
