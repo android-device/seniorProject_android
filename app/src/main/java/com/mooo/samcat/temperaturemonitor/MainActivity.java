@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
                 null //no sort
         );
 
+        savedDevices.clear();
         if(sensor_cursor.moveToFirst()) { //There are Sensors in the database
             sensor newSensor = new sensor(sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE)),
                     sensor_cursor.getString(sensor_cursor.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
@@ -135,8 +136,15 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
 
         if(threshold_cursor.moveToFirst()) { //there are thresholds in the database
             thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
-            while(!threshold_cursor.isLast()) {
-                thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
+            if(!threshold_cursor.isLast()) {
+                while (!threshold_cursor.isLast()) {
+                    threshold_cursor.moveToNext();
+                    thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
+                }
+            }
+            for(int i=0;i<savedDevices.size();i++) {
+                //Toast.makeText(this,"set thresholds",Toast.LENGTH_SHORT).show();
+                savedDevices.get(i).setThresholds(thresholds);
             }
         }
 
@@ -200,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
                 sensor_valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE, newName);
                 sensor_valuesToAdd_db.put(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS, newAddress);
                 sensor newSensor = new sensor(newName, newID, newAddress);
+                newSensor.setThresholds(thresholds);
                 savedDevices.add(newSensor);
                 sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
                 sensor_dbWrite.insert(SavedSensorsContract.SensorEntry.TABLE_NAME, null, sensor_valuesToAdd_db);
@@ -235,8 +244,13 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
             if(threshold_cursor.moveToFirst()) { //there are thresholds in the database
                 thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
                 while(!threshold_cursor.isLast()) {
+                    threshold_cursor.moveToNext();
                     thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
                 }
+            }
+            for(int i=0;i<savedDevices.size();i++) {
+                //Toast.makeText(this,"set thresholds",Toast.LENGTH_SHORT).show();
+                savedDevices.get(i).setThresholds(thresholds);
             }
         }
 
@@ -252,9 +266,11 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
     }
 
     private void refreshSensors() {
-        userMessage.setTextSize(0);
-        checkBluetooth(); //hasn't been disabled, right???
-        scanLeDevice(true);
+        if(savedDevices.size() != 0) {
+            userMessage.setTextSize(0);
+            checkBluetooth(); //hasn't been disabled, right???
+            scanLeDevice(true);
+        }
     }
 
     private Handler mHandler;
@@ -317,13 +333,11 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
         if(validateDevice(device.getAddress())) {
             savedDevices.get(sensorAt).setTemp_batt(uuidInfo);
             sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
-            for(int i=0; i<thresholds.size(); i++) {
-                if (savedDevices.get(sensorAt).getNotify() && //haven't notified for this threshold
-                        savedDevices.get(sensorAt).getTemperature() <= thresholds.get(i) //value is within notification range
-                        )
+            List<Integer> currentThresholds = savedDevices.get(sensorAt).getThresholds();
+            for(int i=0; i<currentThresholds.size(); i++) {
+                if (savedDevices.get(sensorAt).getTemperature() <= currentThresholds.get(i)) //value is within notification range
                 {
-                    savedDevices.get(sensorAt).clearNotify(); //don't re-notify
-                    String notificationMessage = savedDevices.get(sensorAt).getName() + " reached " + thresholds.get(i).toString() + "C";
+                    String notificationMessage = savedDevices.get(sensorAt).getName() + " reached " + currentThresholds.get(i).toString() + "C";
                     NotificationCompat.Builder mBuilder =
                             new NotificationCompat.Builder(this)
                             .setSmallIcon(R.drawable.ic_bluetooth_icon)
@@ -337,6 +351,9 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
                     mBuilder.setContentIntent(resultPendingIntent);
                     NotificationManager mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
                     mNotificationManager.notify(4,mBuilder.build());
+
+                    currentThresholds.remove(i);
+                    savedDevices.get(sensorAt).clearThreshold(i);
                 }
             }
         }

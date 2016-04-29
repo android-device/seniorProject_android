@@ -67,9 +67,12 @@ public class notificationManager extends AppCompatActivity implements OnThreshol
                 null //no sort
         );
 
+        thresholds.clear();
+
         if(threshold_cursor.moveToFirst()) { //there are thresholds in the database
             thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
             while(!threshold_cursor.isLast()) {
+                threshold_cursor.moveToNext();
                 thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
             }
         }
@@ -90,8 +93,8 @@ public class notificationManager extends AppCompatActivity implements OnThreshol
                 try {
                     String newValue = input.getText().toString();
                     int newValueInt = Integer.parseInt(newValue);
-                    threshold_valuesToAdd_db.put(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE, newValue);
                     if(!thresholds.contains(newValueInt)) {
+                        threshold_valuesToAdd_db.put(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE, newValue);
                         thresholds.add(newValueInt);
                         thresholdItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
                         threshold_dbWrite.insert(SavedThresholdsContract.ThresholdEntry.TABLE_NAME, null, threshold_valuesToAdd_db);

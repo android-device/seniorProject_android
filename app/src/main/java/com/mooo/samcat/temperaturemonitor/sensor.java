@@ -1,5 +1,8 @@
 package com.mooo.samcat.temperaturemonitor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by rodrigo on 4/12/16.
  */
@@ -10,7 +13,7 @@ public class sensor {
     private String address; //Bluetooth address
     private String deviceID; //assigned device ID
     private float battery;
-    private boolean notify;
+    private List<Integer> thresholds = new ArrayList<Integer>();
 
     public sensor(String newName, String newID, String newAddress) {
         this.name = newName;
@@ -18,7 +21,6 @@ public class sensor {
         this.temperature = 0;
         this.prevTemperature = 0;
         this.address = newAddress;
-        this.notify = true;
     }
 
     public sensor() {
@@ -28,7 +30,6 @@ public class sensor {
         this.address = "";
         deviceID = "";
         battery = 0;
-        this.notify = true;
     }
 
     public String getName() {
@@ -47,7 +48,7 @@ public class sensor {
     }
 
     public float getBattery() {
-        return this.battery;
+        return this.battery * 100;
     }
 
     public String getAddress() {
@@ -56,18 +57,6 @@ public class sensor {
 
     public String getDeviceID() {
         return this.deviceID;
-    }
-
-    public boolean getNotify() {
-        return this.notify;
-    }
-
-    public void setNotify() {
-        this.notify = true;
-    }
-
-    public void clearNotify() {
-        this.notify = false;
     }
 
     public void setName(String newName) {
@@ -106,6 +95,21 @@ public class sensor {
         setTemperature(hex2decimal(temperature));
         float tempBattery = (float)hex2decimal(battery)/(float)hex2decimal("F");
         setBattery(tempBattery);
+    }
+
+    public void setThresholds(List<Integer> newThresholds) {
+        this.thresholds.clear();
+        for(int i=0; i<newThresholds.size(); i++) {
+            this.thresholds.add(newThresholds.get(i));
+        }
+    }
+
+    public void clearThreshold(Integer location) {
+        this.thresholds.remove(location);
+    }
+
+    public List<Integer> getThresholds() {
+        return this.thresholds;
     }
 
     private int hex2decimal(String s) {
