@@ -17,4 +17,5 @@
     <string name="name_input">Enter a name for this device</string>
     <string name="title_activity_notification_manager">Manage Notification Thresholds</string>
     <string name="add_notification_threshold">Add Notification Threshold</string>
+    <string name="add_notifications_here">Add new notification threshold below</string>
 </resources>

@@ -1,6 +1,9 @@
 package com.mooo.samcat.temperaturemonitor;
 
 import android.app.Activity;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -13,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -23,6 +27,7 @@ import android.database.Cursor;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -169,6 +174,8 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent notificationManagerIntent = new Intent(this,notificationManager.class);
+            startActivityForResult(notificationManagerIntent, settings_RequestCode);
             return true;
         }
 
@@ -209,6 +216,28 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
             }
         } else { //Don't recurse...
             checkBluetooth();
+        }
+        /*When returning from settings, reload the notifications database,
+        Regardless of the return status, which is actually unused - so don't
+        use the return status!!
+         */
+        if(requestCode == settings_RequestCode) {
+            thresholds.clear();
+            Cursor threshold_cursor = threshold_dbRead.query(
+                    SavedThresholdsContract.ThresholdEntry.TABLE_NAME,
+                    threshold_projection,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null //no sort
+            );
+            if(threshold_cursor.moveToFirst()) { //there are thresholds in the database
+                thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
+                while(!threshold_cursor.isLast()) {
+                    thresholds.add(threshold_cursor.getInt(threshold_cursor.getColumnIndex(SavedThresholdsContract.ThresholdEntry.THRESHOLD_VALUE)));
+                }
+            }
         }
 
         scheduleRefresh();
@@ -288,6 +317,28 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
         if(validateDevice(device.getAddress())) {
             savedDevices.get(sensorAt).setTemp_batt(uuidInfo);
             sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged();
+            for(int i=0; i<thresholds.size(); i++) {
+                if (savedDevices.get(sensorAt).getNotify() && //haven't notified for this threshold
+                        savedDevices.get(sensorAt).getTemperature() <= thresholds.get(i) //value is within notification range
+                        )
+                {
+                    savedDevices.get(sensorAt).clearNotify(); //don't re-notify
+                    String notificationMessage = savedDevices.get(sensorAt).getName() + " reached " + thresholds.get(i).toString() + "C";
+                    NotificationCompat.Builder mBuilder =
+                            new NotificationCompat.Builder(this)
+                            .setSmallIcon(R.drawable.ic_bluetooth_icon)
+                            .setContentTitle("Alert Temperature Reached")
+                            .setContentText(notificationMessage);
+                    Intent resultIntent = new Intent(this, MainActivity.class);
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                    stackBuilder.addParentStack(MainActivity.class);
+                    stackBuilder.addNextIntent(resultIntent);
+                    PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                    mBuilder.setContentIntent(resultPendingIntent);
+                    NotificationManager mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+                    mNotificationManager.notify(4,mBuilder.build());
+                }
+            }
         }
     }
 

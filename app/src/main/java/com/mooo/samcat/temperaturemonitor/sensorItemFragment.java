@@ -10,10 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-//import com.mooo.samcat.temperaturemonitor.dummy.DummyContent;
-//import com.mooo.samcat.temperaturemonitor.dummy.DummyContent.DummyItem;
-
-
 /**
  * A fragment representing a list of Items.
  * <p/>

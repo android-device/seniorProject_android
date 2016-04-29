@@ -10,6 +10,7 @@ public class sensor {
     private String address; //Bluetooth address
     private String deviceID; //assigned device ID
     private float battery;
+    private boolean notify;
 
     public sensor(String newName, String newID, String newAddress) {
         this.name = newName;
@@ -17,6 +18,7 @@ public class sensor {
         this.temperature = 0;
         this.prevTemperature = 0;
         this.address = newAddress;
+        this.notify = true;
     }
 
     public sensor() {
@@ -26,6 +28,7 @@ public class sensor {
         this.address = "";
         deviceID = "";
         battery = 0;
+        this.notify = true;
     }
 
     public String getName() {
@@ -53,6 +56,18 @@ public class sensor {
 
     public String getDeviceID() {
         return this.deviceID;
+    }
+
+    public boolean getNotify() {
+        return this.notify;
+    }
+
+    public void setNotify() {
+        this.notify = true;
+    }
+
+    public void clearNotify() {
+        this.notify = false;
     }
 
     public void setName(String newName) {

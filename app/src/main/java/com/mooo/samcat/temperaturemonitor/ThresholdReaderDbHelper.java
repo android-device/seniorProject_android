@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class ThresholdReaderDbHelper extends SQLiteOpenHelper {
 
     private static final String TEXT_TYPE = " TEXT";
-    private static final String COMMA_SEP = ",";
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + SavedThresholdsContract.ThresholdEntry.TABLE_NAME + " (" +
                     SavedThresholdsContract.ThresholdEntry._ID + " INTEGER PRIMARY KEY," +
@@ -21,7 +20,7 @@ public class ThresholdReaderDbHelper extends SQLiteOpenHelper {
 
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
-    public static final String DATABASE_NAME = "Sensors.db";
+    public static final String DATABASE_NAME = "Thresholds.db";
 
     public ThresholdReaderDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

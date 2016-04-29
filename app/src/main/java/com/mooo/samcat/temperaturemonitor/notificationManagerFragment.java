@@ -1,22 +1,86 @@
 package com.mooo.samcat.temperaturemonitor;
 
+import android.content.Context;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * A placeholder fragment containing a simple view.
+ * A fragment representing a list of Items.
+ * <p/>
+ * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
+ * interface.
  */
 public class notificationManagerFragment extends Fragment {
 
+    private static final String ARG_COLUMN_COUNT = "column-count";
+    private int mColumnCount = 1;
+    private OnThresholdListFragmentInteraction mListener;
+
+    /**
+     * Mandatory empty constructor for the fragment manager to instantiate the
+     * fragment (e.g. upon screen orientation changes).
+     */
     public notificationManagerFragment() {
+    }
+
+    @SuppressWarnings("unused")
+    public static notificationManagerFragment newInstance(int columnCount) {
+        notificationManagerFragment fragment = new notificationManagerFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_COLUMN_COUNT, columnCount);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
+        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_notification_manager, container, false);
+        View view = inflater.inflate(R.layout.fragment_sensoritem_list, container, false);
+
+        // Set the adapter
+        if (view instanceof RecyclerView) {
+            Context context = view.getContext();
+            notificationManager.thresholdItemFragmentRecyclerView = (RecyclerView) view;
+            if (mColumnCount <= 1) {
+                notificationManager.thresholdItemFragmentRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+            } else {
+                notificationManager.thresholdItemFragmentRecyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
+            }
+            notificationManager.thresholdItemFragmentRecyclerView.setAdapter(new ThresholdItemRecyclerViewAdapter(notificationManager.thresholds, mListener));
+        }
+        return view;
+    }
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnThresholdListFragmentInteraction) {
+            mListener = (OnThresholdListFragmentInteraction) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnThresholdListFragmentInteraction");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 }

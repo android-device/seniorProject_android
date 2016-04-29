@@ -7,5 +7,4 @@ import com.mooo.samcat.temperaturemonitor.sensor;
  */
 public interface OnListFragmentInteractionListener {
     void OnListFragmentInteraction(sensor item);
-
 }
