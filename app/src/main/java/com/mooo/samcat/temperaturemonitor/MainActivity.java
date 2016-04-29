@@ -97,6 +97,14 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
                     c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
                     c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
             savedDevices.add(newSensor);
+            while(!c.isLast()) { //Iterate through the database and load every device
+                c.moveToNext();
+                newSensor = new sensor(c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_HUMANREADABLE)),
+                        c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ID)),
+                        c.getString(c.getColumnIndex(SavedSensorsContract.SensorEntry.SENSOR_ADDRESS)));
+                savedDevices.add(newSensor);
+            }
+            sensorItemFragmentRecyclerView.getAdapter().notifyDataSetChanged(); //display
         } else { //No Sensors in the database
             userMessage.setTextSize((int)this.getResources().getDimension(R.dimen.message_text_size));
             userMessage.setText(getString(R.string.no_sensors));
@@ -177,6 +185,8 @@ public class MainActivity extends AppCompatActivity implements OnListFragmentInt
         } else { //Don't recurse...
             checkBluetooth();
         }
+
+        scheduleRefresh();
     }
 
     public static boolean checkForDuplicateDevice(sensor item) {
